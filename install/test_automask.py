@@ -9,7 +9,6 @@ import sys
 
 errors = []
 
-
 def check_package(import_name, display_name=None, version_attr="__version__"):
     global errors
     display_name = display_name or import_name
@@ -28,15 +27,6 @@ print("===== TEST ENVIRONNEMENT AUTOMASK =====")
 print(f"Python : {sys.version}")
 print("-" * 50)
 
-# Packages principaux
-check_package("numpy")
-check_package("scipy")
-check_package("cv2", "opencv-python-headless")
-check_package("PyQt5")
-check_package("markdown")
-
-print("-" * 50)
-
 # Torch
 try:
     import torch
@@ -45,7 +35,7 @@ try:
     print(f"\tCUDA disponible : {torch.cuda.is_available()}")
     print(f"\tNombre de GPU : {torch.cuda.device_count()}")
     if torch.cuda.is_available():
-        print(f"\GPU : {torch.cuda.get_device_name(0)}")
+        print(f"\tGPU : {torch.cuda.get_device_name(0)}")
 except Exception as e:
     print(f"[ERREUR] Torch module : {e}")
     errors.append("torch module")
@@ -72,6 +62,15 @@ except Exception as e:
 
 print("-" * 50)
 
+# Packages principaux
+check_package("numpy")
+check_package("scipy")
+check_package("cv2", "opencv-python-headless")
+check_package("PyQt5")
+check_package("markdown")
+
+print("-" * 50)
+
 # -------------------- Qt TEST WINDOW --------------------
 try :
     from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
@@ -87,7 +86,7 @@ try :
     window = QWidget()
     layout = QVBoxLayout()
 
-    label = QLabel(message)
+    label = QLabel('test QT / Automask')
     layout.addWidget(label)
     window.setLayout(layout)
     window.setWindowTitle("Test Environnement Automask")
@@ -96,11 +95,11 @@ try :
 
     # Fermeture automatique après 10 secondes
     QTimer.singleShot(2000, app.quit)
-    sys.exit(app.exec_())
     print(f"[OK] Affichage QT")
 
-except:
-    print(f"[ERREUR] Affichage QT")
+except Exception as e:
+    print(f"[ERREUR] Affichage QT : {e}")
+    errors.append("QT affichage")
 
 print("===== FIN DU TEST  =====")
 
