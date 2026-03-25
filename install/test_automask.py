@@ -6,9 +6,6 @@
 
 import importlib
 import sys
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
-from PyQt5.QtCore import QTimer
-
 
 errors = []
 
@@ -20,7 +17,7 @@ def check_package(import_name, display_name=None, version_attr="__version__"):
         module = importlib.import_module(import_name)
         version = getattr(module, version_attr, "Version inconnue")
         print(f"[OK] {display_name} : {version}")
-        return module
+        return None
     except Exception as e:
         print(f"[ERREUR] {display_name} : {e}")
         errors.append(display_name)
@@ -41,45 +38,54 @@ check_package("markdown")
 print("-" * 50)
 
 # Torch
-torch = check_package("torch")
-if torch:
-    print(f"CUDA compilé avec : {torch.version.cuda}")
-    print(f"CUDA disponible : {torch.cuda.is_available()}")
-    print(f"Nombre de GPU : {torch.cuda.device_count()}")
+try:
+    import torch
+    print("[OK] Torch accessible")
+    print(f"\tCUDA compilé avec : {torch.version.cuda}")
+    print(f"\tCUDA disponible : {torch.cuda.is_available()}")
+    print(f"\tNombre de GPU : {torch.cuda.device_count()}")
     if torch.cuda.is_available():
-        print(f"GPU : {torch.cuda.get_device_name(0)}")
+        print(f"\GPU : {torch.cuda.get_device_name(0)}")
+except Exception as e:
+    print(f"[ERREUR] Torch module : {e}")
+    errors.append("torch module")
 
 print("-" * 50)
 
-check_package("torchvision")
+# Torch vision
+try:
+    import torchvision
+    print("[OK] Torchvision accessible")
+except Exception as e:
+    print(f"[ERREUR] Torchvision module : {e}")
+    errors.append("torchvision module")
 
 print("-" * 50)
 
 # SAM
-sam = check_package("segment_anything")
-if sam:
-    try:
-        from segment_anything import sam_model_registry
-        print("[OK] SAM registry accessible")
-    except Exception as e:
-        print(f"[ERREUR] SAM registry : {e}")
-        errors.append("segment_anything registry")
+try:
+    from segment_anything import sam_model_registry
+    print("[OK] SAM registry accessible")
+except Exception as e:
+    print(f"[ERREUR] SAM registry : {e}")
+    errors.append("segment_anything registry")
 
 print("-" * 50)
 
 # -------------------- Qt TEST WINDOW --------------------
+try :
+    from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
+    from PyQt5.QtCore import QTimer
+except Exception as e:
+    print(f"[ERREUR] PyQT modules : {e}")
+    errors.append("PyQT modules")
 
-app = QApplication(sys.argv)
-
-window = QWidget()
-layout = QVBoxLayout()
-
-if errors:
-    message = "TEST ERREUR:\n" + "\n".join(errors)
-else:
-    message = "TEST OK\nFermeture automatique dans 2 secondes"
 
 try :
+    app = QApplication(sys.argv)
+
+    window = QWidget()
+    layout = QVBoxLayout()
 
     label = QLabel(message)
     layout.addWidget(label)
@@ -90,7 +96,7 @@ try :
 
     # Fermeture automatique après 10 secondes
     QTimer.singleShot(2000, app.quit)
-
+    sys.exit(app.exec_())
     print(f"[OK] Affichage QT")
 
 except:
@@ -98,4 +104,4 @@ except:
 
 print("===== FIN DU TEST  =====")
 
-sys.exit(app.exec_())
+sys.exit()
