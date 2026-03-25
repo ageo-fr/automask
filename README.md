@@ -63,7 +63,7 @@ sudo apt install python3.11 python3.11-venv python3.11-dev
 5. Executer le script d'installation Automask avec la commande suivante :  ```python3.11 install\install.py```
 
 
-## Lancement / execution
+## Lancement / exécution
 
 ### Lancement sous Windows
 
