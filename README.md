@@ -73,7 +73,7 @@ sudo apt install python3.11 python3.11-venv python3.11-dev
 5. Executer le script d'installation Automask avec la commande suivante :  ```python3.11 install\install.py```
 
 
-#### 3. Lancement Automask
+### 3. Lancement Automask
 
 1. Depuis le terminal de commande, se déplacer vers le dossier dans lequel Automask a été installé. Ex. ```cd "automask"```
 2. Exécuter le script de lancement Automask avec la commande suivante :  ```bash automask_run.sh```
