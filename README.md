@@ -6,7 +6,7 @@ Automask est développé par AGEO (Alexandre Guyot) avec le soutien du Service R
 
 ![interface Automask](help/screenshot1.png)
 
-## Installation
+# Installation
 
 L'installation d'Automask utilise un environnement virtuel python (venv), ce qui permet d'exécuter Python et toutes les dépendances de manière isolée et multi-plateformes (Windows, Linux).  
 Sous Windows, l'installation ne nécessite pas de droits administrateurs, et le logiciel peut être supprimé simplement en supprimant le dossier d'installation.
@@ -15,10 +15,13 @@ Sous Windows, l'installation ne nécessite pas de droits administrateurs, et le 
 
 La procédure d'installation est présentée ci-dessous : 
 
+- [pour Windows](https://github.com/ageo-fr/automask?tab=readme-ov-file#pour-windows)
+- [pour Linux](https://github.com/ageo-fr/automask?tab=readme-ov-file#pour-linux)
 
-### Installation Windows
 
-#### Vérification / installation des pré-requis sous Windows
+## Pour Windows
+
+### 1. Vérification / installation des pré-requis
 
 Automask nécessite les prérequis suivants :
 
@@ -34,7 +37,7 @@ Puis, si nécessaire, pour installer ces pré-requis (Windows 11):
 
 ⚠️ Attention un redémarrage est nécessaire après l'installation des pré-requis.
    
-#### Installation Automask sous Windows
+### 2. Installation Automask
 
 1. Vérifier les pré-requis ci-dessus
 2. Télécharger l'archive zip du dépôt: https://github.com/ageo-fr/automask/archive/refs/heads/main.zip
@@ -44,9 +47,16 @@ Puis, si nécessaire, pour installer ces pré-requis (Windows 11):
 5. Se déplacer vers le dossier ```automask``` décompressé précedemment. Ex. ```cd "c:\automask"```
 6. Executer le script d'installation Automask avec la commande suivante :  ```py -3.11 install\install.py```
       
-### Installation Linux
+### 3. Lancement Automask
 
-#### Vérification / installation des pré-requis sous Linux
+1. Depuis le "Menu Démarrer", lancer l'invite de commande ou ```cmd```
+2. Se déplacer vers le dossier dans lequel Automask a été installé. Ex. ```cd "c:\automask"```
+3. Exécuter le script de lancement Automask avec la commande suivante :  ```automask_run.bat```
+
+
+## Pour Linux
+
+### 1. Vérification / installation des pré-requis
 
 Sous Linux, l'installation nécessite python 3.11 :
 
@@ -54,7 +64,7 @@ Sous Linux, l'installation nécessite python 3.11 :
 sudo apt update
 sudo apt install python3.11 python3.11-venv python3.11-dev
 ```
-#### Installation Automask sous Linux
+### 2. Installation Automask
 
 1. Vérifier les pré-requis ci-dessus
 2. Télécharger l'archive zip du dépôt: https://github.com/alexguyot/automask/archive/refs/heads/main.zip
@@ -63,15 +73,7 @@ sudo apt install python3.11 python3.11-venv python3.11-dev
 5. Executer le script d'installation Automask avec la commande suivante :  ```python3.11 install\install.py```
 
 
-## Lancement / exécution
-
-### Lancement sous Windows
-
-1. Depuis le "Menu Démarrer", lancer l'invite de commande ou ```cmd```
-2. Se déplacer vers le dossier dans lequel Automask a été installé. Ex. ```cd "c:\automask"```
-3. Exécuter le script de lancement Automask avec la commande suivante :  ```automask_run.bat```
-
-### Lancement sous Linux
+#### 3. Lancement Automask
 
 1. Depuis le terminal de commande, se déplacer vers le dossier dans lequel Automask a été installé. Ex. ```cd "automask"```
 2. Exécuter le script de lancement Automask avec la commande suivante :  ```bash automask_run.sh```
