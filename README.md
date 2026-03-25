@@ -4,6 +4,8 @@ Automask est un outil semi-automatique de création de masque par segmentation d
 
 Automask est développé par AGEO (Alexandre Guyot) avec le soutien du Service Régional de l'Archéologie / DRAC Bretagne et le support fonctionnel de Philippe Boulinguiez (INRAP Grand Ouest).
 
+![interface Automask](help/screenshot1.png)
+
 ## Installation
 
 L'installation d'Automask utilise un environnement virtuel python (venv), ce qui permet d'exécuter Python et toutes les dépendances de manière isolée et multi-plateformes (Windows, Linux).  
