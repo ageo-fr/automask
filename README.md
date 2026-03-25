@@ -33,7 +33,7 @@ Puis, si nécessaire, pour installer ces pré-requis (Windows 11):
 #### Installation Automask sous Windows
 
 1. Vérifier les pré-requis ci-dessus
-2. Télécharger l'archive zip du dépôt: https://github.com/alexguyot/automask/archive/refs/heads/main.zip
+2. Télécharger l'archive zip du dépôt: https://github.com/ageo-fr/automask/archive/refs/heads/main.zip
 3. Décompresser l'archive sur votre PC (le dossier de décompression sera le dossier d'installation d'Automask)  
    [!! Bonne pratique !!] Eviter les chemins avec espaces ou caractères spéciaux (souvent sources d'erreurs logiciels)
 4. Depuis le "Menu Démarrer", lancer l'invite de commande ou ```cmd```
