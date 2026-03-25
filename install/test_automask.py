@@ -72,15 +72,11 @@ check_package("markdown")
 print("-" * 50)
 
 # -------------------- Qt TEST WINDOW --------------------
+
 try :
     from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QVBoxLayout
     from PyQt5.QtCore import QTimer
-except Exception as e:
-    print(f"[ERREUR] PyQT modules : {e}")
-    errors.append("PyQT modules")
 
-
-try :
     app = QApplication(sys.argv)
 
     window = QWidget()

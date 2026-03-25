@@ -1,6 +1,6 @@
 # À propos d'Automask
 
-Automask version 1.0
+Automask version 1.0.0
 
 ---
 
