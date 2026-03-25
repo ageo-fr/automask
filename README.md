@@ -68,10 +68,10 @@ sudo apt install python3.11 python3.11-venv python3.11-dev
 ### Lancement sous Windows
 
 1. Depuis le "Menu Démarrer", lancer l'invite de commande ou ```cmd```
-2. Déplacer vous vers le dossier dans lequel Automask a été installé. Ex. ```cd "c:\automask"```
-3. Executer le script de lancement Automask avec la commande suivante :  ```automask_run.bat```
+2. Se déplacer vers le dossier dans lequel Automask a été installé. Ex. ```cd "c:\automask"```
+3. Exécuter le script de lancement Automask avec la commande suivante :  ```automask_run.bat```
 
 ### Lancement sous Linux
 
 1. Depuis le terminal de commande, se déplacer vers le dossier dans lequel Automask a été installé. Ex. ```cd "automask"```
-2. Executer le script de lancement Automask avec la commande suivante :  ```bash automask_run.sh```
+2. Exécuter le script de lancement Automask avec la commande suivante :  ```bash automask_run.sh```
