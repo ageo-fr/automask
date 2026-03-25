@@ -6,9 +6,9 @@ Automask version 1.0.0
 
 **Automask** est un outil semi-automatique de création de masque par segmentation d'image.
 Il est adapté à la création de masque pour des projets de photogrammétrie.
-L'outil est basé sur le modèle **Segment Anything (SAM)** de Meta AI.
+L'outil est basé sur le modèle Segment Anything (SAM) de Meta AI.
 
-Automask est développé avec le soutien du **Service Régional de l'Archéologie / DRAC Bretagne**.
+Automask est développé par AGEO (Alexandre Guyot) avec le soutien du Service Régional de l'Archéologie / DRAC Bretagne et le support fonctionnel de Philippe Boulinguiez (INRAP Grand Ouest).
 
 ---
 
