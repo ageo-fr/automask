@@ -8,10 +8,11 @@ Automask est développé par AGEO (Alexandre Guyot) avec le soutien du Service R
 
 # Installation
 
-L'installation d'Automask utilise un environnement virtuel python (venv), ce qui permet d'exécuter Python et toutes les dépendances de manière isolée et multi-plateformes (Windows, Linux).  
+L'installation d'Automask utilise un environnement virtuel python (venv) qui permet d'exécuter Python et toutes les dépendances de manière isolée et multi-plateformes (Windows, Linux).  
 Sous Windows, l'installation ne nécessite pas de droits administrateurs, et le logiciel peut être supprimé simplement en supprimant le dossier d'installation.
 
-3Go d'espace disque sont nécessaires pour installer Automask.  
+⚠️ 3Go d'espace disque sont nécessaires pour installer Automask.  
+⚠️ Une connexion internet est indispensable (la procédure d'installation récupère automatiquement certains packages et fichiers volumineux. A titre d'exemple le modèle IA fait 1.2 Go à lui seul).
 
 La procédure d'installation est présentée ci-dessous : 
 
@@ -33,7 +34,9 @@ Pour vérifier si vous disposez des prérequis :
 
 Puis, si nécessaire, pour installer ces pré-requis (Windows 11):
    - Microsoft Visual C++ Redistributable : https://aka.ms/vc14/vc_redist.x64.exe
-   - Python 3.11 (avec Pyton Manager): https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe
+   - Python 3.11* (avec Python Manager): https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe
+     
+(*) *La version de Python est importante car plusieurs packages nécessaires à Automask ne sont -à ce jour- compatibles qu'avec les versions 3.11 ou 3.12. Si vous utilisez déjà Python mais avec une une version différente, vous pouvez soit mettre à jour votre version (si inférieure), soit installer la 3.11 et utiliser 'Python Manager' pour gérer vos différentes versions.*  
 
 ⚠️ Attention un redémarrage est nécessaire après l'installation des pré-requis.
    
@@ -46,13 +49,14 @@ Puis, si nécessaire, pour installer ces pré-requis (Windows 11):
 4. Depuis le "Menu Démarrer", lancer l'invite de commande ou ```cmd```
 5. Se déplacer vers le dossier ```automask``` décompressé précedemment. Ex. ```cd "c:\automask"```
 6. Executer le script d'installation Automask avec la commande suivante :  ```py -3.11 install\install.py```
+
+⚠️ Si lors de l'installation, une erreur se produit (ce qui peut par exemple arriver si la version de python utilisée est incompatible). Avant de relancer l'installation, assurez-vous que le dossier ```venv``` est bien supprimé du répertoire d'installation. 
       
 ### 3. Lancement Automask
 
 1. Depuis le "Menu Démarrer", lancer l'invite de commande ou ```cmd```
 2. Se déplacer vers le dossier dans lequel Automask a été installé. Ex. ```cd "c:\automask"```
 3. Exécuter le script de lancement Automask avec la commande suivante :  ```automask_run.bat```
-
 
 ## Pour Linux
 
