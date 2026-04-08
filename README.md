@@ -71,7 +71,7 @@ sudo apt install python3.11 python3.11-venv python3.11-dev
 ### 2. Installation Automask
 
 1. Vérifier les pré-requis ci-dessus
-2. Télécharger l'archive zip du dépôt: https://github.com/alexguyot/automask/archive/refs/heads/main.zip
+2. Télécharger l'archive zip du dépôt: https://github.com/ageo-fr/automask/archive/refs/heads/main.zip
 3. Décompresser l'archive (le dossier de décompression sera le dossier d'installation d'Automask)
 4. Depuis le terminal de commande, se déplacer vers le dossier ```automask``` décompressé précedemment. Ex. ```cd "automask"```
 5. Executer le script d'installation Automask avec la commande suivante :  ```python3.11 install\install.py```
