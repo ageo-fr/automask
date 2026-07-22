@@ -1,0 +1,3 @@
+APP_NAME = "Automask"
+APP_VERSION = "1.0.1"
+APP_VERSION_DATE = "2026-07-22"

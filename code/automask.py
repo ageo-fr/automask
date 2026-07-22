@@ -9,6 +9,7 @@ import os
 import configparser
 import csv
 from datetime import datetime
+from version import APP_NAME, APP_VERSION
 import torch # import avant open-cv et qt5 -> plus fiable
 
 # Desactivate Warning GTK (Markdown)
@@ -368,6 +369,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Automask - Outils de segmentation automatique d'image")
+        self.setWindowIcon(QIcon("./icons/AutoMask.ico"))
+
         self.config_path = "settings.ini"
 
         # Crée le log avant l'UI
@@ -473,6 +476,52 @@ class MainWindow(QMainWindow):
         top_layout = QVBoxLayout(top_panel)
         top_layout.setContentsMargins(2, 2, 2, 2)
         top_layout.setSpacing(5)
+
+        # ---- Bandeau application ----
+        info_bar = QFrame()
+        info_bar.setFrameShape(QFrame.StyledPanel)
+        info_bar.setFixedHeight(60)
+
+        info_layout = QHBoxLayout(info_bar)
+        info_layout.setContentsMargins(8, 5, 8, 5)
+
+        # Icône
+        icon_label = QLabel()
+        icon_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "..",
+            "icons",
+            "AutoMask.ico"
+        )
+
+        icon = QIcon(icon_path)
+
+        icon_pixmap = icon.pixmap(48, 48)
+
+        if not icon_pixmap.isNull():
+            icon_label.setPixmap(icon_pixmap)
+
+        info_layout.addWidget(icon_label)
+
+        # Texte
+        info_text = QLabel()
+        info_text.setText(
+            f"""
+            <b>{APP_NAME} </b><br>
+            Version {APP_VERSION}
+            """
+        )
+
+        info_text.setStyleSheet("""
+            QLabel {
+                font-size: 11px;
+            }
+        """)
+
+        info_layout.addWidget(info_text)
+        info_layout.addStretch()
+
+        top_layout.addWidget(info_bar)
 
         # Navigation
         nav_group = QGroupBox("Navigation")
