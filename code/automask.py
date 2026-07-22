@@ -373,6 +373,8 @@ class MainWindow(QMainWindow):
 
         self.config_path = "settings.ini"
 
+        self.resize(1400, 900)
+
         # Crée le log avant l'UI
         self.log_text = QPlainTextEdit()
         self.log_text.setReadOnly(True)
@@ -464,12 +466,16 @@ class MainWindow(QMainWindow):
     # -----------------------------
     def init_ui(self):
         main_widget = QWidget()
-        main_layout = QHBoxLayout(main_widget)  # Layout horizontal principal
-        splitter = QSplitter(Qt.Horizontal)  # Splitter principal
+        main_layout = QHBoxLayout(main_widget)
+
+        # Splitter principal gauche / droite
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.setHandleWidth(5)
 
         # ---- Left panel (buttons + tree)
         left_panel = QSplitter(Qt.Vertical)
         left_panel.setHandleWidth(5)
+        left_panel.setMinimumWidth(360)
 
         # ---- Top buttons panel
         top_panel = QWidget()
@@ -656,19 +662,22 @@ class MainWindow(QMainWindow):
         self.log_text.setContextMenuPolicy(Qt.CustomContextMenu)
         self.log_text.customContextMenuRequested.connect(self.show_log_context_menu)
 
-        # fixer la taille initiale
-        right_panel.setSizes([600, 150])  # ImageViewer 600px, logs 150px
+        # Tailles initiales des panneaux
+        right_panel.setSizes([700, 150])
+        splitter.setSizes([500, 1200])
+        left_panel.setSizes([400, 600])
 
         # Ajoute le splitter droit au splitter horizontal principal
         splitter.addWidget(right_panel)
 
+        # Empêche la colonne gauche de disparaître
+        splitter.setCollapsible(0, False)
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+
         # ---- Ajout du splitter au layout principal ----
         main_layout.addWidget(splitter)
         self.setCentralWidget(main_widget)
-
-        # ---------- FIXER LARGEUR GAUCHE ET HAUTEUR TOP_PANEL ----------
-        splitter.setSizes([300, 800])  # largeur gauche / droite
-        left_panel.setSizes([50, 500])  # top_panel / tree
 
         # Overwrite mask
         self.skip_overwrite_confirmation = False
@@ -1314,6 +1323,5 @@ if __name__ == "__main__":
     # MODE GUI
     app = QApplication(sys.argv)
     win = MainWindow()
-    win.show()
     win.showMaximized()
     sys.exit(app.exec_())
