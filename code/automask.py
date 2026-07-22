@@ -836,6 +836,10 @@ class MainWindow(QMainWindow):
         if not items:
             return
 
+        # Sélection multiple : conserver l'état actuel du viewer
+        if len(items) > 1:
+            return
+
         # Empêche le auto-save pendant un changement d’image
         self._ignore_point_changes = True
 
@@ -877,6 +881,9 @@ class MainWindow(QMainWindow):
             if item.data(0, Qt.UserRole) == fname:
                 item.set_score(score)  # Met à jour la colonne Score
                 item.setIcon(2, QIcon("icons/mask.png"))  # Icône Mask
+                item.setData(2, Qt.UserRole, 1)
+                self.update_tree_header_info()
+                self.tree_widget.viewport().update()
                 break
 
         current_items = self.tree_widget.selectedItems()
@@ -1065,10 +1072,68 @@ class MainWindow(QMainWindow):
             self.viewer.update()
 
     def clear_points(self):
-        # Supprime les points dans le viewer
+        items = self.tree_widget.selectedItems()
+
+        if not items:
+            return
+
+        # Cas sélection multiple : suppression batch
+        if len(items) > 1:
+
+            reply = QMessageBox.warning(
+                self,
+                "Suppression des annotations",
+                f"Vous allez supprimer les points d'annotation de {len(items)} images.\n\n"
+                "Cette action est irréversible.\n\n"
+                "Continuer ?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+
+            if reply != QMessageBox.Yes:
+                self.logger.info("Suppression des annotations annulée")
+                return
+
+            for item in items:
+                fname = item.data(0, Qt.UserRole)
+                base = os.path.splitext(fname)[0]
+
+                csv_path = os.path.join(
+                    self.annotations_dir,
+                    base + "_points.csv"
+                )
+
+                if os.path.exists(csv_path):
+                    os.remove(csv_path)
+
+                # Mise à jour icône annotation
+                item.setIcon(
+                    1,
+                    QIcon("icons/pencil_gray.png")
+                )
+                item.setData(1, Qt.UserRole, 0)
+
+                self.logger.info(
+                    f"[{base}]\t suppression des points"
+                )
+
+            # Si l'image courante fait partie de la sélection
+            current = self.tree_widget.currentItem()
+            if current in items:
+                self.viewer.clear_points()
+
+            return
+
+        # Cas image unique : comportement actuel
         self.viewer.clear_points()
         self.auto_save_current()
-        self.update_icons()
+
+        item = items[0]
+        item.setIcon(
+            1,
+            QIcon("icons/pencil_gray.png")
+        )
+        item.setData(1, Qt.UserRole, 0)
 
     def del_last_point(self):
         if self.viewer.points:
@@ -1263,7 +1328,7 @@ class MainWindow(QMainWindow):
         self.batch_progress.setFormat("Calcul terminé")
         self.btn_mask_calc.setEnabled(True)  # Compute réactivé
         self.btn_stop.setEnabled(False)  # STOP désactivé
-        self.populate_list()
+        #self.populate_list()
 
 
     # =====================================================================
