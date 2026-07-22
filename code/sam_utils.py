@@ -9,6 +9,7 @@ import numpy as np
 import cv2
 import time
 import logging
+from pathlib import Path
 
 # Récupère le logger
 logger = logging.getLogger("Automask")
@@ -39,7 +40,7 @@ def init_sam(model_type, checkpoint):
     # Choix device
     SAM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-    if not os.path.isfile(checkpoint):
+    if not Path(checkpoint).is_file():
         logger.error(f"Le fichier Checkpoint '{checkpoint}' n'a pas été trouvé")
         return False
 
@@ -69,14 +70,14 @@ def run_sam(image_path, csv_path):
     # load image
     img_bgr = cv2.imread(image_path)
     if img_bgr is None:
-        logger.warning(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t impossible de charger le fichier image ({image_path})")
+        logger.warning(f"[{image_path.stem}]\t impossible de charger le fichier image ({image_path})")
         return None
 
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
 
     # load points
     if not os.path.exists(csv_path):
-        logger.warning(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t impossible de charger le fichier annotation ({csv_path})")
+        logger.warning(f"[{image_path.stem}]\t impossible de charger le fichier annotation ({csv_path})")
         return None
 
     points = np.genfromtxt(
@@ -87,15 +88,15 @@ def run_sam(image_path, csv_path):
     )
 
     if points.size == 0:
-        logger.warning(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t aucun point dans le fichier annotation")
-        logger.warning(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t aucun masque calculé")
+        logger.warning(f"[{image_path.stem}]\t aucun point dans le fichier annotation")
+        logger.warning(f"[{image_path.stem}]\t aucun masque calculé")
         return None
 
     if points.ndim == 1:
         points = points[np.newaxis, :]
 
     try:
-        logger.info(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t calcul du masque en cours ...")
+        logger.info(f"[{image_path.stem}]\t calcul du masque en cours ...")
         start_time = time.time()
         SAM_PREDICTOR.set_image(img_rgb)
 
@@ -105,9 +106,9 @@ def run_sam(image_path, csv_path):
             multimask_output=False
         )
         elapsed_time = time.time() - start_time
-        logger.info(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t masque calculé (en {elapsed_time:.2f}s)")
+        logger.info(f"[{image_path.stem}]\t masque calculé (en {elapsed_time:.2f}s)")
         return masks[0], scores[0] # (H,W)
 
     except Exception as e:
-        logger.error(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t erreur lors de la prédiction. Aucun masque calculé")
+        logger.error(f"[{image_path.stem}]\t erreur lors de la prédiction. Aucun masque calculé")
         return None

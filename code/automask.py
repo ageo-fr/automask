@@ -9,11 +9,19 @@ import os
 import configparser
 import csv
 from datetime import datetime
-from version import APP_NAME, APP_VERSION
+from version import APP_NAME, APP_VERSION, APP_VERSION_DATE
+from pathlib import Path
 import torch # import avant open-cv et qt5 -> plus fiable
 
 # Desactivate Warning GTK (Markdown)
 os.environ["NO_AT_BRIDGE"] = "1"
+
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+ICON_DIR = BASE_DIR / "icons"
+HELP_DIR = BASE_DIR / "help"
+CONFIG_FILE = BASE_DIR / "settings.ini"
 
 # --- IMPORTS EXISTANTS ---
 from PyQt5.QtWidgets import (
@@ -43,9 +51,9 @@ class SettingsDialog(QDialog):
         super().__init__()
         self.setWindowTitle("Paramètres des dossiers")
         layout = QFormLayout(self)
-        self.img_edit = QLineEdit(images_dir)
-        self.ann_edit = QLineEdit(annotations_dir)
-        self.mask_edit = QLineEdit(masks_dir)
+        self.img_edit = QLineEdit(str(images_dir))
+        self.ann_edit = QLineEdit(str(annotations_dir))
+        self.mask_edit = QLineEdit(str(masks_dir))
         self.img_browse = QPushButton("...")
         self.ann_browse = QPushButton("...")
         self.mask_browse = QPushButton("...")
@@ -71,7 +79,11 @@ class SettingsDialog(QDialog):
         if d: lineedit.setText(d)
 
     def get_paths(self):
-        return self.img_edit.text(), self.ann_edit.text(), self.mask_edit.text()
+        return (
+            Path(self.img_edit.text()),
+            Path(self.ann_edit.text()),
+            Path(self.mask_edit.text())
+        )
 
     def get_ask_on_start(self):
         return not self.chk_startup.isChecked()
@@ -97,8 +109,8 @@ class ImageViewer(QWidget):
         self.setMinimumSize(400, 300)
 
     def load_image(self, path):
-        self.image = QPixmap(path)
-        self.current_image_name = os.path.splitext(os.path.basename(path))[0]
+        self.image = QPixmap(str(path))
+        self.current_image_name = Path(path).stem
         self.points = []
         self.mask = None
         self.offset = QPoint(0, 0)
@@ -125,7 +137,7 @@ class ImageViewer(QWidget):
         self.update()
 
     def load_mask(self, mask_path):
-        mask_pix = QPixmap(mask_path)
+        mask_pix = QPixmap(str(mask_path))
         img = mask_pix.toImage().convertToFormat(QImage.Format_ARGB32)
         mask = img.createMaskFromColor(qRgb(255, 255, 255), Qt.MaskOutColor)
         img.setAlphaChannel(mask)
@@ -138,7 +150,7 @@ class ImageViewer(QWidget):
 
     def reload_mask(self, mask_path):
         """Recharge le masque depuis le disque"""
-        if os.path.exists(mask_path):
+        if mask_path.exists():
             self.load_mask(mask_path)
         else:
             self.mask = None
@@ -324,10 +336,10 @@ class BatchThread(QThread):
             if self.stopped:
                 break
 
-            base = os.path.splitext(fname)[0]
-            img_path  = os.path.join(self.images_dir, fname)
-            csv_path  = os.path.join(self.annotations_dir, base + "_points.csv")
-            mask_path = os.path.join(self.masks_dir, base + "_mask.png")
+            base = Path(fname).stem
+            img_path = self.images_dir / fname
+            csv_path = self.annotations_dir / f"{base}_points.csv"
+            mask_path = self.masks_dir / f"{base}_mask.png"
 
             # Appel SAM
             mask, score = compute_and_save_mask(img_path, csv_path, mask_path, postfilter=self.postfilter)
@@ -369,9 +381,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Automask - Outils de segmentation automatique d'image")
-        self.setWindowIcon(QIcon("./icons/AutoMask.ico"))
+        self.setWindowIcon(QIcon(str(ICON_DIR / "AutoMask.ico")))
 
-        self.config_path = "settings.ini"
+        self.config_path = Path("settings.ini")
 
         self.resize(1400, 900)
 
@@ -391,7 +403,7 @@ class MainWindow(QMainWindow):
         self._last_selected_item = None  # Pour suivre l'élément actuellement sélectionné
 
         for d in (self.images_dir, self.annotations_dir, self.masks_dir):
-            os.makedirs(d, exist_ok=True)
+            d.mkdir(parents=True, exist_ok=True)
 
         self.scores = {}  # initialise le dictionnaire des scores
         self.load_scores()
@@ -420,14 +432,18 @@ class MainWindow(QMainWindow):
 
     def load_config(self):
         config = configparser.ConfigParser()
-        if os.path.exists("settings.ini"):
-            config.read("settings.ini")
-            self.images_dir = config.get('paths',
-                                         'images', fallback='images')
-            self.annotations_dir = config.get('paths',
-                                              'annotations', fallback='annotations')
-            self.masks_dir = config.get('paths',
-                                        'masks', fallback='masks')
+        if self.config_path.exists():
+            config.read(self.config_path, encoding="utf-8")
+
+            self.images_dir = Path(
+                config.get('paths', 'images', fallback='images')
+            )
+            self.annotations_dir = Path(
+                config.get('paths', 'annotations', fallback='annotations')
+            )
+            self.masks_dir = Path(
+                config.get('paths', 'masks', fallback='masks')
+            )
             self.ask_on_start = config.getboolean('paths',
                                         'ask_on_start', fallback=True)
             self.sam_model = config.get('model',
@@ -460,7 +476,7 @@ class MainWindow(QMainWindow):
             'sam_model': self.sam_model,
             'sam_checkpoint': self.sam_checkpoint
         }
-        with open(self.config_path, 'w') as f:
+        with self.config_path.open("w", encoding="utf-8") as f:
             config.write(f)
 
     # -----------------------------
@@ -475,7 +491,7 @@ class MainWindow(QMainWindow):
         # ---- Left panel (buttons + tree)
         left_panel = QSplitter(Qt.Vertical)
         left_panel.setHandleWidth(5)
-        left_panel.setMinimumWidth(360)
+        left_panel.setMinimumWidth(100)
 
         # ---- Top buttons panel
         top_panel = QWidget()
@@ -493,14 +509,8 @@ class MainWindow(QMainWindow):
 
         # Icône
         icon_label = QLabel()
-        icon_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            "..",
-            "icons",
-            "AutoMask.ico"
-        )
-
-        icon = QIcon(icon_path)
+        icon_path = BASE_DIR / "icons" / "AutoMask.ico"
+        icon = QIcon(str(icon_path))
 
         icon_pixmap = icon.pixmap(48, 48)
 
@@ -639,9 +649,9 @@ class MainWindow(QMainWindow):
         header.setSectionsClickable(True)  # Permet de cliquer sur les en-têtes pour trier
 
         # Fixer largeur colonnes
-        self.tree_widget.setColumnWidth(0, 250)  # Image
-        self.tree_widget.setColumnWidth(1, 150)  # Annot.
-        self.tree_widget.setColumnWidth(2, 150)  # Mask
+        self.tree_widget.setColumnWidth(0, 220)  # Image
+        self.tree_widget.setColumnWidth(1, 100)  # Annot.
+        self.tree_widget.setColumnWidth(2, 100)  # Mask
         self.tree_widget.setColumnWidth(3, 100)  # Score
 
         left_panel.addWidget(top_panel)
@@ -769,26 +779,27 @@ class MainWindow(QMainWindow):
 
         # Récupère les fichiers image et les trie alphabétiquement
         files = sorted(
-            [f for f in os.listdir(self.images_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+            [f for f in self.images_dir.iterdir() if f.suffix.lower().endswith(('.png', '.jpg', '.jpeg'))]
         )
 
         for fname in files:
-            base = os.path.splitext(fname)[0]
-            csv_path = os.path.join(self.annotations_dir, base + "_points.csv")
-            mask_path = os.path.join(self.masks_dir, base + "_mask.png")
+            fname = fname.name
+            base = Path(fname).stem
+            csv_path = self.annotations_dir / f"{base}_points.csv"
+            mask_path = self.masks_dir / f"{base}_mask.png"
 
-            ann_present = os.path.exists(csv_path) and os.path.getsize(csv_path) > 0
-            mask_present = os.path.exists(mask_path)
+            ann_present = csv_path.exists() and csv_path.stat().st_size > 0
+            mask_present = mask_path.exists()
 
             item = TreeItem()
             item.setText(0, fname)
             item.setData(0, Qt.UserRole, fname)
 
             # Icônes annotation / masque
-            item.setIcon(1, QIcon("icons/pencil.png") if ann_present else QIcon("icons/pencil_gray.png"))
+            item.setIcon(1, QIcon(str(ICON_DIR / "pencil.png")) if ann_present else QIcon(str(ICON_DIR / "pencil_gray.png")))
             item.setData(1, Qt.UserRole, int(ann_present))
 
-            item.setIcon(2, QIcon("icons/mask.png") if mask_present else QIcon("icons/mask_gray.png"))
+            item.setIcon(2, QIcon(str(ICON_DIR / "mask.png")) if mask_present else QIcon(str(ICON_DIR / "mask_gray.png")))
             item.setData(2, Qt.UserRole, int(mask_present))
 
             # --- Nouvelle colonne Score ---
@@ -852,9 +863,9 @@ class MainWindow(QMainWindow):
                 return
 
             self._last_selected_item = fname
-            base = os.path.splitext(fname)[0]
+            base = Path(fname).stem
 
-            img_path = os.path.join(self.images_dir, fname)
+            img_path = self.images_dir / fname
             self.viewer.load_image(img_path)
 
             pts = self.load_points_file(base)
@@ -880,7 +891,7 @@ class MainWindow(QMainWindow):
             item = self.tree_widget.topLevelItem(i)
             if item.data(0, Qt.UserRole) == fname:
                 item.set_score(score)  # Met à jour la colonne Score
-                item.setIcon(2, QIcon("icons/mask.png"))  # Icône Mask
+                item.setIcon(2, QIcon(str(ICON_DIR / "mask.png")))  # Icône Mask
                 item.setData(2, Qt.UserRole, 1)
                 self.update_tree_header_info()
                 self.tree_widget.viewport().update()
@@ -890,8 +901,8 @@ class MainWindow(QMainWindow):
         if current_items:
             current_fname = current_items[-1].data(0, Qt.UserRole)
             if current_fname == fname:
-                base = os.path.splitext(fname)[0]
-                mask_path = os.path.join(self.masks_dir, base + "_mask.png")
+                base = Path(fname).stem
+                mask_path = self.masks_dir / f"{base}_mask.png"
                 self.viewer.reload_mask(mask_path)
 
     def update_icons(self, items=None):
@@ -906,7 +917,7 @@ class MainWindow(QMainWindow):
 
         for item in items:
             fname = item.data(0, Qt.UserRole)
-            base = os.path.splitext(fname)[0]
+            base = Path(fname).stem
 
             # --- Annotation ---
             points = []
@@ -916,19 +927,19 @@ class MainWindow(QMainWindow):
                 points = self.viewer.points
 
             if points:
-                item.setIcon(1, QIcon("icons/pencil.png"))
+                item.setIcon(1, QIcon(str(ICON_DIR / "pencil.png")))
                 item.setData(1, Qt.UserRole, 1)
             else:
-                item.setIcon(1, QIcon("icons/pencil_gray.png"))
+                item.setIcon(1, QIcon(str(ICON_DIR / "pencil_gray.png")))
                 item.setData(1, Qt.UserRole, 0)
 
             # --- Mask ---
-            mask_path = os.path.join(self.masks_dir, base + "_mask.png")
-            if os.path.exists(mask_path):
-                item.setIcon(2, QIcon("icons/mask.png"))
+            mask_path = self.masks_dir / f"{base}_mask.png"
+            if mask_path.exists():
+                item.setIcon(2, QIcon(str(ICON_DIR / "mask.png")))
                 item.setData(2, Qt.UserRole, 1)
             else:
-                item.setIcon(2, QIcon("icons/mask_gray.png"))
+                item.setIcon(2, QIcon(str(ICON_DIR / "mask_gray.png")))
                 item.setData(2, Qt.UserRole, 0)
 
         # Forcer le repaint du tree pour appliquer les icônes
@@ -939,9 +950,10 @@ class MainWindow(QMainWindow):
     # =====================================================================
 
     def save_points(self, fname):
-        base = os.path.splitext(fname)[0]
-        csv_path = os.path.join(self.annotations_dir, base + "_points.csv")
-        os.makedirs(self.annotations_dir, exist_ok=True)
+        base = Path(fname).stem
+        csv_path = self.annotations_dir / f"{base}_points.csv"
+
+        self.annotations_dir.mkdir(parents=True, exist_ok=True)
 
         points_list = [[int(p.x()), int(p.y())] for p in self.viewer.points]
 
@@ -952,10 +964,10 @@ class MainWindow(QMainWindow):
         #self.populate_list()
 
     def load_points_file(self, base):
-        csv_path = os.path.join(self.annotations_dir, base + "_points.csv")
+        csv_path = self.annotations_dir / f"{base}_points.csv"
         points = []
 
-        if os.path.exists(csv_path):
+        if csv_path.exists():
             with open(csv_path, mode='r', encoding='utf-8', newline='') as f:
                 reader = csv.reader(f)
                 for row in reader:
@@ -967,8 +979,8 @@ class MainWindow(QMainWindow):
         return points
 
     def load_mask_file(self, base):
-        mask_path = os.path.join(self.masks_dir, base + "_mask.png")
-        if os.path.exists(mask_path):
+        mask_path = self.masks_dir / f"{base}_mask.png"
+        if mask_path.exists():
             self.viewer.load_mask(mask_path)
 
     # =====================================================================
@@ -987,8 +999,8 @@ class MainWindow(QMainWindow):
     def load_scores(self):
         """Charge le fichier score.csv et retourne un dict {fname: score}"""
         self.scores = {}
-        score_file = os.path.join(self.masks_dir, "score.csv")
-        if os.path.exists(score_file):
+        score_file = self.masks_dir / "score.csv"
+        if score_file.exists():
             with open(score_file, newline='', encoding='utf-8') as f:
                 reader = csv.reader(f)
                 for row in reader:
@@ -1001,8 +1013,8 @@ class MainWindow(QMainWindow):
 
     def save_score_file(self):
         """Écrit l'intégralité du score.csv depuis self.scores"""
-        score_file = os.path.join(self.masks_dir, "score.csv")
-        os.makedirs(self.masks_dir, exist_ok=True)
+        score_file = self.masks_dir / "score.csv"
+        self.masks_dir.mkdir(parents=True, exist_ok=True)
 
         with open(score_file, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
@@ -1096,20 +1108,17 @@ class MainWindow(QMainWindow):
 
             for item in items:
                 fname = item.data(0, Qt.UserRole)
-                base = os.path.splitext(fname)[0]
+                base = Path(fname).stem
 
-                csv_path = os.path.join(
-                    self.annotations_dir,
-                    base + "_points.csv"
-                )
+                csv_path = self.annotations_dir / f"{base}_points.csv"
 
-                if os.path.exists(csv_path):
-                    os.remove(csv_path)
+                if csv_path.exists():
+                    csv_path.unlink()
 
                 # Mise à jour icône annotation
                 item.setIcon(
                     1,
-                    QIcon("icons/pencil_gray.png")
+                    QIcon(str(ICON_DIR / "pencil_gray.png"))
                 )
                 item.setData(1, Qt.UserRole, 0)
 
@@ -1131,7 +1140,7 @@ class MainWindow(QMainWindow):
         item = items[0]
         item.setIcon(
             1,
-            QIcon("icons/pencil_gray.png")
+            QIcon(str(ICON_DIR / "pencil_gray.png"))
         )
         item.setData(1, Qt.UserRole, 0)
 
@@ -1214,10 +1223,10 @@ class MainWindow(QMainWindow):
         if not overwrite:
             files_to_keep = []
             for fname in file_list:
-                base = os.path.splitext(fname)[0]
-                mask_path = os.path.join(self.masks_dir, base + "_mask.png")
+                base = Path(fname).stem
+                mask_path = self.masks_dir / f"{base}_mask.png"
 
-                if not os.path.exists(mask_path):
+                if not mask_path.exists():
                     files_to_keep.append(fname)
                 else:
                     self.logger.info(
@@ -1273,15 +1282,15 @@ class MainWindow(QMainWindow):
         # Parcours de tous les items sélectionnés
         for item in items:
             fname = item.data(0, Qt.UserRole)
-            base = os.path.splitext(fname)[0]
-            mask_path = os.path.join(self.masks_dir, base + "_mask.png")
+            base = Path(fname).stem
+            mask_path = self.masks_dir / f"{base}_mask.png"
 
             # Vérifier si le masque existe déjà
-            if os.path.exists(mask_path) and not overwrite:
+            if mask_path.exists() and not overwrite:
                 self.logger.info(f"[{base}]\t masque existant (cocher 'Ecraser résultat' pour inversion)")
                 continue
 
-            if not os.path.exists(mask_path):
+            if not mask_path.exists():
                 self.logger.info(f"[{base}]\t aucun masque à inverser")
                 continue
 
@@ -1301,11 +1310,11 @@ class MainWindow(QMainWindow):
 
         for item in items:
             fname = item.data(0, Qt.UserRole)
-            base = os.path.splitext(fname)[0]
-            mask_path = os.path.join(self.masks_dir, base + "_mask.png")
+            base = Path(fname).stem
+            mask_path = self.masks_dir / f"{base}_mask.png"
 
-            if os.path.exists(mask_path):
-                os.remove(mask_path)
+            if mask_path.exists():
+                mask_path.unlink()
                 self.logger.info(f"[{base}]\t suppression du masque")
 
                 # Supprime aussi le score
@@ -1348,7 +1357,16 @@ class MainWindow(QMainWindow):
     # =====================================================================
 
     def show_about(self):
-        dlg = HelpDialog("À propos", "./help/about.md", self)
+        dlg = HelpDialog(
+            "À propos",
+            "./help/about.md",
+            self,
+            variables={
+                "APP_NAME": APP_NAME,
+                "APP_VERSION": APP_VERSION,
+                "APP_VERSION_DATE": APP_VERSION_DATE
+            }
+        )
         dlg.exec_()
 
     def show_shortcuts(self):

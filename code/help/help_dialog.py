@@ -5,24 +5,35 @@
 # ======================================
 
 import os
+from pathlib import Path
 import markdown
 
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTextBrowser
 
 
-def load_markdown(path):
-    if not os.path.exists(path):
+def load_markdown(path, variables=None):
+    path = Path(path)
+
+    if not path.exists():
         return "<i>Fichier d’aide introuvable</i>"
 
-    with open(path, encoding="utf-8") as f:
-        md = f.read()
+    md = path.read_text(encoding="utf-8")
+
+    # Remplacement des variables
+    if variables:
+        for key, value in variables.items():
+            md = md.replace(
+                "{{" + key + "}}",
+                str(value)
+            )
 
     return markdown.markdown(md, extensions=["extra"])
 
 
 class HelpDialog(QDialog):
-    def __init__(self, title, md_path, parent=None):
+    def __init__(self, title, md_path, parent=None, variables=None):
         super().__init__(parent)
+
         self.setWindowTitle(title)
         self.resize(700, 500)
 
@@ -30,6 +41,9 @@ class HelpDialog(QDialog):
 
         browser = QTextBrowser()
         browser.setOpenExternalLinks(True)
-        browser.setHtml(load_markdown(md_path))
+
+        browser.setHtml(
+            load_markdown(md_path, variables)
+        )
 
         layout.addWidget(browser)

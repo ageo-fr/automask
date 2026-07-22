@@ -10,6 +10,7 @@ import numpy as np
 from scipy import ndimage
 from sam_utils import run_sam
 import logging
+from pathlib import Path
 
 # Récupère le logger
 logger = logging.getLogger("Automask")
@@ -19,8 +20,8 @@ def compute_and_save_mask(image_path, csv_path, out_path, postfilter=None):
     Appelle SAM via run_sam() et sauvegarde le mask PNG.
     Retourne True/False selon succès.
     """
-    if not os.path.exists(csv_path) or os.path.getsize(csv_path) == 0:
-        logger.warning(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t Aucune annotation trouvée (calcul de masque non-effectué)")
+    if not csv_path.exists() or csv_path.stat().st_size == 0:
+        logger.warning( f"[{image_path.stem}]\t Aucune annotation trouvée (calcul de masque non-effectué)")
         return None, None
 
     mask, score_sam = run_sam(image_path, csv_path)
@@ -29,14 +30,14 @@ def compute_and_save_mask(image_path, csv_path, out_path, postfilter=None):
     score_morpho = compacity_score(mask)
     score_final = np.mean([score_sam, score_morpho])
 
-    logger.info(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t score de prédiction/morphologie : {score_sam:.2f}/{score_morpho:.2f}")
-    logger.info(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t score final {score_final:.2f}")
+    logger.info( f"[{image_path.stem}]\t score de prédiction/morphologie : {score_sam:.2f}/{score_morpho:.2f}")
+    logger.info( f"[{image_path.stem}]\t score final {score_final:.2f}")
 
     if mask is None:
         return None, None
 
     if postfilter is not None:
-        logger.info(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t post-filtering (< {postfilter}px)...")
+        logger.info( f"[{image_path.stem}]\t post-filtering (< {postfilter}px)...")
         mask = postfilter_mask(mask, postfilter)
 
     # mask → uint8
@@ -44,10 +45,10 @@ def compute_and_save_mask(image_path, csv_path, out_path, postfilter=None):
 
     try:
         cv2.imwrite(out_path, mask_u8)
-        logger.info(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t Masque sauvegardé sous {out_path}")
+        logger.info( f"[{image_path.stem}]\t Masque sauvegardé sous {out_path}")
         return mask, score_final
     except Exception as e:
-        logger.error(f"[{os.path.splitext(os.path.basename(image_path))[0]}]\t Erreur lors du calcul ou sauvegarde du masque")
+        logger.error( f"[{image_path.stem}]\t Erreur lors du calcul ou sauvegarde du masque")
         return None, None
 
 def postfilter_mask(mask, min_size):
@@ -130,7 +131,7 @@ def invert_and_save_mask(mask_path):
     mask_path : chemin du PNG à inverser
     Retourne True si succès, False sinon
     """
-    if not os.path.exists(mask_path):
+    if not mask_path.exists():
         logger.error(f"Masque introuvable : {mask_path}")
         return False
 

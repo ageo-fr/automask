@@ -1,8 +1,8 @@
 # À propos d'Automask
 
-Automask version 1.0.1
+Version : {{APP_VERSION}}  
+Date : {{APP_VERSION_DATE}}
 
-<img src="../icons/AutoMask.ico" alt="Logo AutoMask" width="200">
 ---
 
 **Automask** est un outil semi-automatique de création de masque par segmentation d'image.
