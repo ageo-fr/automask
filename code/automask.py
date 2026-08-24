@@ -16,8 +16,6 @@ import torch # import avant open-cv et qt5 -> plus fiable
 # Desactivate Warning GTK (Markdown)
 os.environ["NO_AT_BRIDGE"] = "1"
 
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 ICON_DIR = BASE_DIR / "icons"
 HELP_DIR = BASE_DIR / "help"
@@ -342,8 +340,11 @@ class BatchThread(QThread):
             mask_path = self.masks_dir / f"{base}_mask.png"
 
             # Appel SAM
-            mask, score = compute_and_save_mask(img_path, csv_path, mask_path, postfilter=self.postfilter)
-
+            try: 
+                mask, score = compute_and_save_mask(img_path, csv_path, mask_path, postfilter=self.postfilter)
+            except Exception as e:
+                self.logger.info(f"Erreur lors du calcul du masque : {e}")
+                break
 
             # Mettre à jour
             self.score.emit(fname, score)
