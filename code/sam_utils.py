@@ -59,26 +59,26 @@ def init_sam(model_type, checkpoint):
 def run_sam(image_path, csv_path):
     """
     Exécute prédiction SAM.
-    Retourne un mask (H,W) booléen ou None en cas d'échec.
+    Retourne un mask (H,W) booléen = score ou None, None en cas d'échec.
     """
     global SAM_PREDICTOR
 
     if SAM_PREDICTOR is None:
         logger.error("SAM indisponible.")
-        return None
+        return None, None
 
     # load image
     img_bgr = cv2.imread(image_path)
     if img_bgr is None:
         logger.warning(f"[{image_path.stem}]\t impossible de charger le fichier image ({image_path})")
-        return None
+        return None, None
 
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
 
     # load points
     if not os.path.exists(csv_path):
         logger.warning(f"[{image_path.stem}]\t impossible de charger le fichier annotation ({csv_path})")
-        return None
+        return None, None
 
     points = np.genfromtxt(
         csv_path,
@@ -90,7 +90,7 @@ def run_sam(image_path, csv_path):
     if points.size == 0:
         logger.warning(f"[{image_path.stem}]\t aucun point dans le fichier annotation")
         logger.warning(f"[{image_path.stem}]\t aucun masque calculé")
-        return None
+        return None, None
 
     if points.ndim == 1:
         points = points[np.newaxis, :]
@@ -111,4 +111,4 @@ def run_sam(image_path, csv_path):
 
     except Exception as e:
         logger.error(f"[{image_path.stem}]\t erreur lors de la prédiction. Aucun masque calculé")
-        return None
+        return None, None
