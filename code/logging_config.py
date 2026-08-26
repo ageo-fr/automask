@@ -1,6 +1,6 @@
 # ======================================
 # Auteur : Alexandre Guyot
-# Date : 2026-03-25
+# Date : 2026-08-26
 # Description : Automask - logging
 # ======================================
 
@@ -8,6 +8,7 @@ import logging
 from PyQt5.QtCore import QObject, pyqtSignal
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
+from version import APP_NAME, APP_VERSION, APP_VERSION_DATE
 
 # Handler personnalisé pour Qt
 class QPlainTextEditLogger(logging.Handler, QObject):
@@ -60,5 +61,6 @@ def setup_logging(log_text_edit):
 
     # Message de démarrage
     logger.info(f"=== Démarrage Automask - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===")
+    logger.info(f"{APP_NAME} version {APP_VERSION} ({APP_VERSION_DATE})")
 
     return logger
