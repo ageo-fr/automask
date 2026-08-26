@@ -24,7 +24,12 @@ def compute_and_save_mask(image_path, csv_path, out_path, postfilter=None):
         logger.warning( f"[{image_path.stem}]\t Aucune annotation trouvée (calcul de masque non-effectué)")
         return None, None
 
-    mask, score_sam = run_sam(image_path, csv_path)
+    try:
+        mask, score_sam = run_sam(image_path, csv_path)
+    except Exception as e:
+        logger.error(f"Erreur lors du calcul du masque : {e}")
+        return None, None
+
     if score_sam > 1:
         score_sam = 1
     score_morpho = compacity_score(mask)

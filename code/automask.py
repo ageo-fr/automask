@@ -340,12 +340,8 @@ class BatchThread(QThread):
             mask_path = self.masks_dir / f"{base}_mask.png"
 
             # Appel SAM
-            try: 
-                mask, score = compute_and_save_mask(img_path, csv_path, mask_path, postfilter=self.postfilter)
-            except Exception as e:
-                self.logger.info(f"Erreur lors du calcul du masque : {e}")
-                break
-
+            mask, score = compute_and_save_mask(img_path, csv_path, mask_path, postfilter=self.postfilter)
+            
             # Mettre à jour
             self.score.emit(fname, score)
             self.progress.emit(int((idx+1) / total * 100))
