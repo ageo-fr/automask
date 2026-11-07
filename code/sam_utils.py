@@ -1,6 +1,6 @@
 # ======================================
 # Auteur : Alexandre Guyot
-# Date : 2026-03-25
+# Date : 2026-11-07
 # Description : Automask - sam
 # ======================================
 
@@ -107,6 +107,7 @@ def run_sam(image_path, csv_path):
         )
         elapsed_time = time.time() - start_time
         logger.info(f"[{image_path.stem}]\t masque calculé (en {elapsed_time:.2f}s)")
+
         return masks[0], scores[0] # (H,W)
 
     except Exception as e:

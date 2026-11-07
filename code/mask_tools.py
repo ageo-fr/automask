@@ -1,6 +1,6 @@
 # ======================================
 # Auteur : Alexandre Guyot
-# Date : 2026-03-25
+# Date : 2026-11-07
 # Description : Automask - mask tools
 # ======================================
 
@@ -30,16 +30,22 @@ def compute_and_save_mask(image_path, csv_path, out_path, postfilter=None):
         logger.error(f"Erreur lors du calcul du masque : {e}")
         return None, None
 
+    if mask is None:
+        logger.error(f"Erreur lors du calcul du masque : masque None")
+        return None, None
+
+    if score_sam is None:
+        logger.info(f"Erreur à la récupération du score : forcage score à 0")
+        score_sam = 0.
+        
     if score_sam > 1:
         score_sam = 1
+    
     score_morpho = compacity_score(mask)
     score_final = np.mean([score_sam, score_morpho])
 
     logger.info( f"[{image_path.stem}]\t score de prédiction/morphologie : {score_sam:.2f}/{score_morpho:.2f}")
     logger.info( f"[{image_path.stem}]\t score final {score_final:.2f}")
-
-    if mask is None:
-        return None, None
 
     if postfilter is not None:
         logger.info( f"[{image_path.stem}]\t post-filtering (< {postfilter}px)...")

@@ -610,8 +610,9 @@ class MainWindow(QMainWindow):
         self.btn_mask_toggle.setChecked(False)
         row2.addWidget(self.btn_mask_toggle)
         row2.addWidget(self.btn_mask_invert)
-        self.batch_checkbox = QCheckBox("Ecraser résultat (si existant)")
-        row2.addWidget(self.batch_checkbox)
+        self.overwrite_checkbox = QCheckBox("Ecraser résultat (si existant)")
+        self.overwrite_checkbox.setChecked(True)  # Activé par défaut
+        row2.addWidget(self.overwrite_checkbox)
         mask_layout.addLayout(row2)
 
         # Ligne 3 : Supprimer masque
@@ -1214,7 +1215,7 @@ class MainWindow(QMainWindow):
             return
 
         file_list = [i.data(0, Qt.UserRole) for i in items]
-        overwrite = self.batch_checkbox.isChecked()
+        overwrite = self.overwrite_checkbox.isChecked()
 
         # --- Filtrage si overwrite désactivé ---
         if not overwrite:
@@ -1274,7 +1275,7 @@ class MainWindow(QMainWindow):
         if not items:
             return
 
-        overwrite = self.batch_checkbox.isChecked()
+        overwrite = self.overwrite_checkbox.isChecked()
 
         # Parcours de tous les items sélectionnés
         for item in items:
